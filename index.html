@@ -1,35 +1,430 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wartung</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #fff5f7;
-            color: #d63384;
-            text-align: center;
-            padding: 100px 20px;
-            margin: 0;
-        }
-        h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-        .flower {
-            font-size: 3em;
-            opacity: 0.7;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Für dich – BLUMIS ♡</title>
+  <style>
+    :root{
+      --bg:#fff7fb; --bg2:#fdf2f8; --ink:#3a2b3b; --sub:#7a6476; --tile:#ffffffcc; --stroke:#f2d7e6;
+      --accent:#e56fa6; --accent-2:#ffd9e8; --ok:#45b29a; --lock:#b8a5b1; --shadow:0 14px 40px rgba(229,111,166,.15);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1000px 500px at 80% -10%, #ffe3ee, transparent),
+        radial-gradient(800px 400px at -10% 90%, #ffeaf4, transparent),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+    }
+    .container{max-width:980px;margin:0 auto;padding:28px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    h1{margin:0;font-weight:800;letter-spacing:.3px;font-size:clamp(22px,3vw,34px)}
+    .badge{padding:6px 10px;border-radius:999px;background:var(--accent-2);color:var(--ink);font-size:12px;border:1px solid var(--stroke)}
+
+    /* Lock-Screen */
+    .lock{
+      position:fixed;inset:0;
+      background:linear-gradient(180deg, rgba(255,247,251,.96), rgba(253,242,248,.96));
+      display:grid;place-items:center;z-index:50;
+    }
+    .lock-card{
+      width:min(92%,420px);
+      background:var(--tile);
+      backdrop-filter:blur(6px);
+      border:1px solid var(--stroke);
+      border-radius:20px;
+      padding:22px;
+      box-shadow:var(--shadow);
+      text-align:center;
+    }
+    input[type="password"]{
+      width:100%;padding:12px 14px;border-radius:12px;
+      border:1px solid var(--stroke);background:#fff;color:var(--ink);
+    }
+    .cta{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:12px;
+      border:1px solid var(--stroke);background:#fff;
+      box-shadow:var(--shadow);text-decoration:none;color:var(--ink);
+      cursor:pointer;
+    }
+    .cta:hover{transform:translateY(-1px)}
+    .err{color:#d3456a;font-size:13px;min-height:18px}
+
+    /* Kacheln */
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .tile{
+      grid-column:span 6;
+      background:var(--tile);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      position:relative;overflow:hidden;
+    }
+    @media(min-width:860px){.tile{grid-column:span 3}}
+    .tile h3{margin:0 0 6px;font-size:18px}
+    .muted{color:var(--sub)}
+    .lockmark{position:absolute;top:10px;right:12px;color:var(--lock);font-size:18px}
+    .open{display:flex;align-items:center;gap:10px;margin-top:8px}
+    .open .btn{
+      padding:8px 12px;border-radius:10px;
+      border:1px solid var(--stroke);
+      background:linear-gradient(180deg,#fff,#fff7fb);
+      text-decoration:none;color:var(--ink);box-shadow:var(--shadow);
+      cursor:pointer;
+    }
+    .open .btn.primary{
+      border-color:#f4b5cd;
+      background:linear-gradient(180deg,#ffe3ee,#ffd9e8);
+    }
+    .flag{
+      display:inline-block;padding:4px 8px;border-radius:999px;
+      background:#fdf0f5;border:1px solid var(--stroke);font-size:12px;
+    }
+
+    /* Modal */
+    dialog{border:none;border-radius:18px;box-shadow:var(--shadow);padding:0;max-width:520px;width:92%}
+    dialog::backdrop{background:rgba(0,0,0,.2)}
+    .modal{
+      padding:20px 18px 18px;
+      border:1px solid var(--stroke);
+      background:white;border-radius:18px;position:relative;
+    }
+    .modal h3{margin:0 0 4px}
+    .close{
+      position:absolute;top:10px;right:14px;
+      border:none;background:transparent;font-size:20px;
+      cursor:pointer;color:var(--sub);
+    }
+
+    .flower-wrap{
+      margin-top:10px;
+      border-radius:16px;
+      background:linear-gradient(135deg,#fff7fb,#ffeaf4);
+      border:1px solid var(--stroke);
+      overflow:hidden;
+    }
+    .flower-img-wrap{
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .45s ease, opacity .45s ease, transform .45s ease;
+      opacity:0;
+      transform:translateY(-6px);
+    }
+    .flower-img-wrap.show{
+      max-height:260px;
+      opacity:1;
+      transform:translateY(0);
+    }
+    .flower-img{
+      width:100%;
+      display:block;
+      object-fit:cover;
+      max-height:240px;
+    }
+    .flower-text{
+      padding:10px 12px 12px;
+    }
+    .flower-name{
+      font-weight:600;
+      margin:0 0 4px;
+    }
+    .flower-paragraph{
+      margin:0 0 6px;
+      font-size:14px;
+    }
+    .flower-hadith{
+      margin:0;
+      font-size:13px;
+      color:var(--sub);
+      font-style:italic;
+    }
+
+    .thought-box{
+      margin-top:14px;
+      padding:12px;
+      border-radius:14px;
+      background:#fff;
+      border:1px solid var(--stroke);
+    }
+    .thought-box label{display:block;font-size:14px;margin-bottom:6px}
+    textarea{
+      width:100%;min-height:90px;
+      border-radius:12px;border:1px solid var(--stroke);
+      padding:10px;background:#fff7fb;color:var(--ink);
+      resize:vertical;font-family:inherit;font-size:14px;
+    }
+    .actions-row{
+      display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;
+    }
+    .cta.small{padding:6px 10px;font-size:13px;border-radius:10px;box-shadow:none}
+    .cta.ghost{background:transparent;border-style:dashed}
+    .mini{font-size:12px;margin-top:4px;color:var(--sub);}
+  </style>
 </head>
 <body>
-    <div class="flower">🌸</div>
-    <h1>Komm später vorbei</h1>
-    <p>Die Seite ist gerade in Wartung. hbb</p>
+  <!-- PASSCODE -->
+  <div class="lock" id="lock">
+    <div class="lock-card">
+      <h2 style="margin:0 0 6px">Hallo, du schöne Seele ✿</h2>
+      <p class="muted">Gib die vierstellige Zahl ein, um den Kalender zu öffnen.</p>
+      <input id="codeInput" type="password" inputmode="numeric" placeholder="••••" maxlength="8" autocomplete="off" />
+      <div class="err" id="codeErr"></div>
+      <button class="cta" id="unlockBtn" style="width:100%">Öffnen</button>
+      <p class="muted" style="margin:10px 0 0;font-size:12px">Nur für dich ♡</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>BLUMIS</h1>
+      <span class="badge" id="yearTag"></span>
+    </header>
+    <section class="grid" id="tiles"></section>
+  </div>
+
+  <!-- MODAL für Monats-Blume -->
+  <dialog id="monthModal">
+    <div class="modal">
+      <button class="close" id="closeModal" aria-label="Schließen">×</button>
+      <h3 id="modalMonth">Monat</h3>
+
+      <div class="flower-wrap">
+        <div class="flower-img-wrap" id="flowerImgWrap">
+          <img id="flowerImg" class="flower-img" src="" alt="">
+        </div>
+        <div class="flower-text">
+          <p class="flower-name" id="flowerName"></p>
+          <p class="flower-paragraph" id="flowerParagraph"></p>
+          <p class="flower-hadith" id="flowerHadith"></p>
+        </div>
+      </div>
+
+      <div class="thought-box">
+        <label for="thoughtInput">Dein Gedanke für mich 💌</label>
+        <textarea id="thoughtInput" placeholder="Schreib hier etwas, das bei mir ankommen soll …"></textarea>
+        <div class="actions-row">
+          <button class="cta small" id="saveThought">Speichern</button>
+          <a class="cta small ghost" id="sendThought" href="#">Als E-Mail senden</a>
+        </div>
+        <p class="mini" id="thoughtSaved"></p>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    const PASSCODE = "0405";
+
+    // ====== LOCK-LOGIK ======
+    (function lock(){
+      const lockEl = document.getElementById('lock');
+      const input = document.getElementById('codeInput');
+      const err   = document.getElementById('codeErr');
+
+      function tryUnlock(){
+        if(input.value.trim() === PASSCODE){
+          sessionStorage.setItem('access_granted','1');
+          lockEl.style.display = 'none';
+        } else {
+          err.textContent = 'Falscher Code';
+        }
+      }
+      document.getElementById('unlockBtn').addEventListener('click', tryUnlock);
+      input.addEventListener('keydown', e => { if(e.key === 'Enter') tryUnlock(); });
+      if(sessionStorage.getItem('access_granted') === '1') lockEl.style.display = 'none';
+    })();
+
+    // ====== KONFIG ======
+    const tiles   = document.getElementById('tiles');
+    const yearTag = document.getElementById('yearTag');
+    const year    = 2026;
+    yearTag.textContent = String(year);
+
+    const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+    // HIER deine E-Mail eintragen:
+    const EMAIL_TO = "deine.mail@example.com";
+
+    // ---------------- MONATE FREISCHALTEN ----------------
+    // Beispiel: Nur Januar freigeben:
+    // const ACTIVE_MONTHS = [0];
+    // Beispiel: Januar & Februar freigeben:
+    // const ACTIVE_MONTHS = [0,1];
+    // Aktuell: alles gesperrt:
+    const ACTIVE_MONTHS = [];
+
+    // Bilder: lege in deinem Projekt z.B. /images/blume-0.jpg bis blume-11.jpg an
+    // und passe die Pfade hier ggf. an.
+    const flowerData = [
+      {
+        name:"Winterrose",
+        image:"images/blume-0.jpg",
+        paragraph:"Eine leise, starke Blume, die mitten in der Kälte blüht – so wie du auch in schweren Phasen Halt geben kannst.",
+        hadith:"Sinngemäß: Im Körper gibt es ein Herz – ist es gut, ist der ganze Mensch gut. (Bukhari, Muslim)"
+      },
+      {
+        name:"Zarte Nelke",
+        image:"images/blume-1.jpg",
+        paragraph:"Klein, aber präsent. Sie erinnert daran, dass nicht die Lautstärke zählt, sondern die Aufrichtigkeit hinter einer Geste.",
+        hadith:"Sinngemäß: Allah ist gütig und liebt die Güte in allem, was ihr tut."
+      },
+      {
+        name:"Frühlings-Tulpe",
+        image:"images/blume-2.jpg",
+        paragraph:"Sie steht für dieses vorsichtige Aufblühen, wenn man sich erlaubt, neue Kapitel zu beginnen – auch wenn man noch nicht alles versteht.",
+        hadith:"Sinngemäß: Wer sich um Allahs Willen auf den Weg macht, dem erleichtert Er den Weg zum Guten. (Muslim)"
+      },
+      {
+        name:"Kirschblüte",
+        image:"images/blume-3.jpg",
+        paragraph:"Ihr Moment ist kurz, aber intensiv. Sie lädt dazu ein, kleine Phasen bewusst wahrzunehmen, bevor sie weiterziehen.",
+        hadith:"Sinngemäß: Nutze fünf, bevor fünf kommen – unter ihnen deine Zeit, bevor dich anderes einholt."
+      },
+      {
+        name:"Margherite",
+        image:"images/blume-4.jpg",
+        paragraph:"Eine einfache Blume, die Wiesen heller macht – so wie deine Art Räume leichter und weicher wirken lässt.",
+        hadith:"Sinngemäß: Der Beste von euch ist derjenige, der den Menschen am nützlichsten ist."
+      },
+      {
+        name:"Rosé-Rose",
+        image:"images/blume-5.jpg",
+        paragraph:"Sie spricht nicht laut, sie ist einfach da – wie stille Zuneigung, die man nicht erklären muss, aber spürt.",
+        hadith:"Sinngemäß: Die besten von euch sind die, die am besten zu ihrer Familie sind."
+      },
+      {
+        name:"Sonnenblume",
+        image:"images/blume-6.jpg",
+        paragraph:"Sie richtet sich zum Licht, auch wenn der Boden nicht perfekt ist. Eine Erinnerung, dich dorthin zu wenden, was dir gut tut.",
+        hadith:"Sinngemäß: Wer Allahs Nähe sucht, dem kommt Er noch näher entgegen."
+      },
+      {
+        name:"Lavendel",
+        image:"images/blume-7.jpg",
+        paragraph:"Sie steht für Ruhe und einen inneren Ort, an dem dein Kopf kurz leiser sein darf – egal, wie laut der Tag war.",
+        hadith:"Sinngemäß: Im Gedenken Allahs finden die Herzen ihre Ruhe. (Sure 13:28)"
+      },
+      {
+        name:"Wiesenblume",
+        image:"images/blume-8.jpg",
+        paragraph:"Nicht geplant, nicht perfekt, aber echt. So wie viele Momente, die im Nachhinein genau richtig waren.",
+        hadith:"Sinngemäß: Allah sieht auf euer Herz und eure Taten, nicht auf euer Äußeres. (Muslim)"
+      },
+      {
+        name:"Herbstrose",
+        image:"images/blume-9.jpg",
+        paragraph:"Sie zeigt, dass Schönheit auch in Übergangsphasen existiert – während sich Dinge sortieren und neu anordnen.",
+        hadith:"Sinngemäß: Wer etwas um Allahs willen verlässt, dem gibt Allah etwas Besseres dafür."
+      },
+      {
+        name:"Amaryllis",
+        image:"images/blume-10.jpg",
+        paragraph:"Sie blüht, wenn vieles draußen grau ist. Eine stille Erinnerung daran, dass du selbst im Winter innere Farbe hast.",
+        hadith:"Sinngemäß: Staune über die Stärke des Gläubigen – jede Lage ist für ihn gut. (Muslim)"
+      },
+      {
+        name:"Sternenblume",
+        image:"images/blume-11.jpg",
+        paragraph:"Sie wirkt, als würde sie ein kleines eigenes Licht tragen – wie deine leise Art, Dinge heller zu machen.",
+        hadith:"Sinngemäß: Am Tag der Auferstehung wird man mit denen sein, die man liebt. (Bukhari)"
+      }
+    ];
+
+    // ====== KACHELN RENDERN ======
+    for(let m=0; m<12; m++){
+      const tile = document.createElement('article');
+      tile.className = 'tile';
+
+      const isActive = ACTIVE_MONTHS.includes(m);
+      tile.innerHTML = `
+        <div class="lockmark">${isActive ? '✿' : '🔒'}</div>
+        <h3>${monthNames[m]}</h3>
+        <p class="muted">
+          ${isActive ? 'Freigeschaltet – deine Blume wartet' : 'Gesperrt bis ' + monthNames[m] + ' ' + year}
+        </p>
+        <div class="open">
+          ${
+            isActive
+              ? '<button class="btn primary" data-month="'+m+'">Steckbrief öffnen</button>'
+              : '<span class="flag">Bald</span>'
+          }
+        </div>
+      `;
+
+      if(isActive){
+        const btn = tile.querySelector('[data-month]');
+        btn.addEventListener('click', () => openMonth(m));
+      }
+
+      tiles.appendChild(tile);
+    }
+
+    // ====== MODAL / GEDANKEN-LOGIK ======
+    const monthModal    = document.getElementById('monthModal');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    const modalMonth      = document.getElementById('modalMonth');
+    const flowerImgWrap   = document.getElementById('flowerImgWrap');
+    const flowerImg       = document.getElementById('flowerImg');
+    const flowerNameEl    = document.getElementById('flowerName');
+    const flowerParagraphEl = document.getElementById('flowerParagraph');
+    const flowerHadithEl  = document.getElementById('flowerHadith');
+
+    const thoughtInput = document.getElementById('thoughtInput');
+    const saveThought  = document.getElementById('saveThought');
+    const sendThought  = document.getElementById('sendThought');
+    const thoughtSaved = document.getElementById('thoughtSaved');
+
+    let currentMonthIndex = null;
+
+    function openMonth(m){
+      currentMonthIndex = m;
+      const data = flowerData[m] || {};
+      modalMonth.textContent       = monthNames[m] + " " + year;
+      flowerNameEl.textContent     = data.name || "";
+      flowerParagraphEl.textContent= data.paragraph || "";
+      flowerHadithEl.textContent   = data.hadith || "";
+      flowerImg.src                = data.image || "";
+      flowerImg.alt                = data.name || "";
+
+      // Aufklapp-Animation: kurz zurücksetzen, dann Klasse setzen
+      flowerImgWrap.classList.remove('show');
+      void flowerImgWrap.offsetWidth; // Reflow-Trick
+      flowerImgWrap.classList.add('show');
+
+      const key = `blumis_thought_${year}_${m}`;
+      const stored = localStorage.getItem(key) || "";
+      thoughtInput.value = stored;
+      thoughtSaved.textContent = stored ? "Gespeichert auf diesem Gerät. 🤍" : "";
+
+      const body = encodeURIComponent(stored || "");
+      const subject = encodeURIComponent(`Blumis – ${monthNames[m]} ${year}`);
+      sendThought.href = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
+
+      monthModal.showModal();
+    }
+
+    closeModalBtn.addEventListener('click', () => monthModal.close());
+    monthModal.addEventListener('click', (e)=>{
+      if(e.target === monthModal) monthModal.close();
+    });
+
+    saveThought.addEventListener('click', () => {
+      if(currentMonthIndex === null) return;
+      const key = `blumis_thought_${year}_${currentMonthIndex}`;
+      const text = thoughtInput.value.trim();
+      localStorage.setItem(key, text);
+      thoughtSaved.textContent = "Gespeichert. Danke für deinen Gedanken. ♡";
+
+      const body = encodeURIComponent(text);
+      const subject = encodeURIComponent(`Blumis – ${monthNames[currentMonthIndex]} ${year}`);
+      sendThought.href = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
+    });
+  </script>
 </body>
 </html>
